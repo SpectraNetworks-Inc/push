@@ -29,7 +29,7 @@ const getPushSettings = async() => {
 
 
 const getSelfSchedule = async() => {
-    let payload = { companyId: await redis.client.get('PushCompanyId'), employeeId: await redis.client.get('PushUserableId'), token: process.env.PUSHTOKEN };
+    let payload = { companyId: await redis.client.get('PushCompanyId'), employeeId: await redis.client.get('PushUserableId'), token: await redis.client.get('PushToken') };
     const params = new url.URLSearchParams(payload);
     let res = await axios.get(`https://app-elb.pushoperations.com/api/v1/ios/getMySchedules?${params}`)
     .then((res) => {
@@ -37,20 +37,51 @@ const getSelfSchedule = async() => {
         const entries = Object.entries(obj);
 
         entries.forEach(([key, value]) => {
+            redis.client.set(`Schedule:${value.business_date}`, JSON.stringify(value));
             console.log(`Start: ${value.scheduled_start_str} - End: ${value.scheduled_end_str} Hours: ${value.regular_hours}`);
-        });
-
+        })
 
         }).catch(err => {
             console.log(err);
         });
-    return res;
+}
+
+
+const getClockStatus = async(res, req) => {
+    let payload = { start: '2022-03-02', end: '2040-01-01', token: await redis.client.get('PushToken') };
+    const params = new url.URLSearchParams(payload);
+
+    const respond = await axios.get(`https://app-elb.pushoperations.com/api/v2/clocks/employee/${await redis.client.get('PushUserableId')}?${params}`).then((res) => {
+
+        const obj = res.data.data;
+        const entries = Object.entries(obj);
+
+        entries.forEach(([key, value]) => {
+            redis.client.set(`Workday:${value.businessDate}`, JSON.stringify(value));
+            console.log(`${key} - ${value.id}`);
+            return data;
+        })
+
+    }).catch(err => {
+        console.log(err);
+    });
+}
+
+
+const cleanup = async() => {
+    var present=new Date();
+    var past=new Date(present);
+    past.setDate(past.getDate() - 10);
+    const oldDate = past.toISOString().split('T')[0];
+
+    console.log(oldDate);
 }
 
 
 
+const test = async() => {
+    console.log(await getClockStatus());
+}
 
-
-getSelfSchedule();
-
+test();
 module.exports = { getPushSettings, getSelfSchedule };

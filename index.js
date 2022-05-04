@@ -21,9 +21,11 @@ app.use(cors());
 //Routes
 const routesV1 = require('./routes/v1');
 app.use('/v1', routesV1);
+
+
 //Core Service Start
 app.get('/', (req, res) => {
-    res.send('Dev')
+    res.json('Yeet');
   })
 
 
