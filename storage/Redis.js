@@ -7,9 +7,4 @@ const RedisURL = process.env.REDIS_URL;
 let client = new Redis(RedisURL);
 
 
-client.set('foo', 'bar');
-
-
-
-
 module.exports = { client };
