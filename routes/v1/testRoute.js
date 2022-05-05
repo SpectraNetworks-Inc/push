@@ -4,7 +4,7 @@ const router = express.Router();
 
 router
   .get('/', async (req, res) => {
-    res.send('Dev');
+    res.send('Yeet');
   });
 
 module.exports = router;
