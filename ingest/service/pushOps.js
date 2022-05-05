@@ -31,19 +31,13 @@ const getPushSettings = async() => {
 const getSelfSchedule = async() => {
     let payload = { companyId: await redis.client.get('PushCompanyId'), employeeId: await redis.client.get('PushUserableId'), token: await redis.client.get('PushToken') };
     const params = new url.URLSearchParams(payload);
-    let res = await axios.get(`https://app-elb.pushoperations.com/api/v1/ios/getMySchedules?${params}`)
-    .then((res) => {
+
+    const respond = await axios.get(`https://app-elb.pushoperations.com/api/v1/ios/getMySchedules?${params}`).then((res) => {
         const obj = res.data.mySchedules;
         const entries = Object.entries(obj);
 
-        entries.forEach(([key, value]) => {
-            redis.client.set(`Schedule:${value.business_date}`, JSON.stringify(value));
-            console.log(`Start: ${value.scheduled_start_str} - End: ${value.scheduled_end_str} Hours: ${value.regular_hours}`);
-        })
+// For Loop to iterate through schedule
 
-        }).catch(err => {
-            console.log(err);
-        });
 }
 
 
@@ -56,15 +50,8 @@ const getClockStatus = async(res, req) => {
         const obj = res.data.data;
         const entries = Object.entries(obj);
 
-        entries.forEach(([key, value]) => {
-            redis.client.set(`Workday:${value.businessDate}`, JSON.stringify(value));
-            console.log(`${key} - ${value.id}`);
-            return data;
-        })
+// For Loop
 
-    }).catch(err => {
-        console.log(err);
-    });
 }
 
 
